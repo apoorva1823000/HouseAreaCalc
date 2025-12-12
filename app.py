@@ -203,10 +203,11 @@ if properties_data:
             save_properties(properties_data)
             st.success(f"Deleted '{delete_choice}' successfully!")
 
-            st.experimental_rerun()
+            st.rerun()
 
 else:
     st.info("No properties available to delete.")
+
 
 
 
