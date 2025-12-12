@@ -172,10 +172,10 @@ if properties_data:
     compare_df = pd.DataFrame([
         {
             "Property": name,
-            "Carpet Area (sqft)": info["total_sqft"],
-            "Carpet Area (sqyd)": info["total_sqyd"],
-            "Claimed Area (sqft)": info["claimed_area"],
-            "Claimed Area (sqyd)": info["claimed_area_sqyd"],  # ✔ now correct
+            "Carpet Area (sqft)": info.get("total_sqft"),
+            "Carpet Area (sqyd)": info.get("total_sqyd"),
+            "Claimed Area (sqft)": info.get("claimed_area"),
+            "Claimed Area (sqyd)": info.get("claimed_area_sqyd", info["claimed_area"] / 9),
         }
         for name, info in properties_data.items()
     ])
@@ -184,3 +184,5 @@ if properties_data:
 
 else:
     st.info("No properties saved yet.")
+
+
