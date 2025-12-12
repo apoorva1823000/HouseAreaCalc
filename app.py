@@ -38,35 +38,6 @@ def to_feet(ft, inch):
 def room_area(l_ft, l_in, b_ft, b_in):
     return to_feet(l_ft, l_in) * to_feet(b_ft, b_in)
 
-def draw_floorplan(df):
-    if df.empty:
-        st.info("Add rooms to see the floorplan.")
-        return
-    
-    fig, ax = plt.subplots(figsize=(10, 10))
-    offset_y = 0
-
-    for _, row in df.iterrows():
-        L = row["Length (ft)"]
-        B = row["Breadth (ft)"]
-
-        rect = plt.Rectangle((0, offset_y), L, B, fill=None, edgecolor='black', linewidth=1.2)
-        ax.add_patch(rect)
-
-        ax.text(L/2, offset_y + B/2,
-                f"{row['Room']}\n{row['Area (sqft)']:.1f} sq ft",
-                ha='center', va='center', fontsize=8)
-
-        offset_y += B + 1
-
-    ax.set_xlim(0, df["Length (ft)"].max() + 3)
-    ax.set_ylim(0, offset_y + 3)
-    ax.set_aspect("equal")
-    ax.set_title("Floorplan (Diagrammatic)")
-    ax.invert_yaxis()
-
-    st.pyplot(fig)
-
 # -----------------------------------
 # UI: Property Name
 # -----------------------------------
@@ -152,15 +123,14 @@ else:
     st.download_button("📥 Download CSV", csv, "area_summary.csv", "text/csv")
 
 # -----------------------------------
-# Floorplan
-# -----------------------------------
-# st.subheader("4️⃣ Auto Floorplan Visualizer")
-# draw_floorplan(df)
-
-# -----------------------------------
 # Totals
 # -----------------------------------
 st.subheader("5️⃣ Total Areas")
+
+total_sqft = None
+total_sqyd = None
+claimed_area = None
+claimed_area_sqyd = None
 
 if not df.empty:
     total_sqft = total_area
@@ -175,20 +145,20 @@ if not df.empty:
 
     st.metric("Claimed Area", f"{claimed_area:.1f} sq ft")
     st.metric("Claimed Area", f"{claimed_area_sqyd:.1f} sq yd")
-    
+
     st.success("Calculation complete!")
 
 # -----------------------------------
-# Save Property
+# Save Property  (FIXED)
 # -----------------------------------
-if not df.empty and property_name.strip():
+if not df.empty and property_name.strip() and claimed_area_sqyd is not None:
     if st.button("💾 Save Property"):
         properties_data[property_name] = {
             "rooms": df.to_dict(orient="records"),
             "total_sqft": float(total_sqft),
             "total_sqyd": float(total_sqyd),
             "claimed_area": float(claimed_area),
-            "claimed_area_sqyd": float(claimed_area_sqyd)
+            "claimed_area_sqyd": float(claimed_area_sqyd)   # ✔ correctly saving computed value
         }
         save_properties(properties_data)
         st.success(f"Saved '{property_name}' successfully!")
@@ -205,7 +175,7 @@ if properties_data:
             "Carpet Area (sqft)": info["total_sqft"],
             "Carpet Area (sqyd)": info["total_sqyd"],
             "Claimed Area (sqft)": info["claimed_area"],
-            "Claimed Area (sqyd)": info["claimed_area_sqyd"],
+            "Claimed Area (sqyd)": info["claimed_area_sqyd"],  # ✔ now correct
         }
         for name, info in properties_data.items()
     ])
@@ -214,7 +184,3 @@ if properties_data:
 
 else:
     st.info("No properties saved yet.")
-
-
-
-
