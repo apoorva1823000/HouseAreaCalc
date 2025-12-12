@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 # -----------------------------------
 # Page Setup
 # -----------------------------------
-st.set_page_config(page_title="Floorplan & Area Calculator", layout="wide")
+st.set_page_config(page_title=" New Floorplan & Area Calculator", layout="wide")
 
-st.title("🏠 Floorplan & Area Calculator")
+st.title("🏠 New Floorplan & Area Calculator")
 st.caption("Enter room counts → dimensions → get areas + auto floorplan.")
 
 # -----------------------------------
@@ -153,4 +153,5 @@ if not df.empty:
     st.metric("Claimed Area", f"{claimed_area/9:.1f} sq yd")
 
     st.success("Done!")
+
 
