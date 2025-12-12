@@ -174,7 +174,7 @@ if not df.empty:
 
     st.metric("Claimed Area", f"{claimed_area:.1f} sq ft")
     st.metric("Claimed Area", f"{claimed_area/9:.1f} sq yd")
-
+    
     st.success("Calculation complete!")
 
 # -----------------------------------
@@ -186,7 +186,8 @@ if not df.empty and property_name.strip():
             "rooms": df.to_dict(orient="records"),
             "total_sqft": float(total_sqft),
             "total_sqyd": float(total_sqyd),
-            "claimed_area": float(claimed_area)
+            "claimed_area": float(claimed_area),
+            "claimed_area_sqyd": float(claimed_area/9)
         }
         save_properties(properties_data)
         st.success(f"Saved '{property_name}' successfully!")
@@ -202,7 +203,8 @@ if properties_data:
             "Property": name,
             "Carpet Area (sqft)": info["total_sqft"],
             "Carpet Area (sqyd)": info["total_sqyd"],
-            "Claimed Area (sqft)": info["claimed_area"]
+            "Claimed Area (sqft)": info["claimed_area"],
+            "Claimed Area (sqyd)": info["claimed_area_sqyd"],
         }
         for name, info in properties_data.items()
     ])
@@ -211,4 +213,5 @@ if properties_data:
 
 else:
     st.info("No properties saved yet.")
+
 
