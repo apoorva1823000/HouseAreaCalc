@@ -154,8 +154,8 @@ else:
 # -----------------------------------
 # Floorplan
 # -----------------------------------
-st.subheader("4️⃣ Auto Floorplan Visualizer")
-draw_floorplan(df)
+# st.subheader("4️⃣ Auto Floorplan Visualizer")
+# draw_floorplan(df)
 
 # -----------------------------------
 # Totals
@@ -166,7 +166,7 @@ if not df.empty:
     total_sqft = total_area
     total_sqyd = total_sqft / 9
     claimed_area = total_sqft / 0.75
-    claimed_area_sqyd = claimed_area/9
+    claimed_area_sqyd = claimed_area / 9
 
     st.metric("Carpet Area", f"{total_sqft:.1f} sq ft")
     st.metric("Carpet Area", f"{total_sqyd:.1f} sq yd")
@@ -188,7 +188,7 @@ if not df.empty and property_name.strip():
             "total_sqft": float(total_sqft),
             "total_sqyd": float(total_sqyd),
             "claimed_area": float(claimed_area),
-            "claimed_area_sqyd": float(claimed_area/9)
+            "claimed_area_sqyd": float(claimed_area_sqyd)
         }
         save_properties(properties_data)
         st.success(f"Saved '{property_name}' successfully!")
@@ -214,6 +214,7 @@ if properties_data:
 
 else:
     st.info("No properties saved yet.")
+
 
 
 
