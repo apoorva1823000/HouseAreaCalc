@@ -184,5 +184,29 @@ if properties_data:
 
 else:
     st.info("No properties saved yet.")
+# -----------------------------------
+# Delete a Saved Property
+# -----------------------------------
+st.header("🗑️ Delete Saved Property")
+
+if properties_data:
+    delete_choice = st.selectbox(
+        "Select a property to delete",
+        options=list(properties_data.keys()),
+        index=None,
+        placeholder="Choose a property..."
+    )
+
+    if delete_choice:
+        if st.button("❌ Delete Selected Property"):
+            del properties_data[delete_choice]
+            save_properties(properties_data)
+            st.success(f"Deleted '{delete_choice}' successfully!")
+
+            st.experimental_rerun()
+
+else:
+    st.info("No properties available to delete.")
+
 
 
