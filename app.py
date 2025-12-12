@@ -1,14 +1,33 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
+import os
 
 # -----------------------------------
 # Page Setup
 # -----------------------------------
-st.set_page_config(page_title=" New Floorplan & Area Calculator", layout="wide")
+st.set_page_config(page_title="Floorplan & Area Calculator", layout="wide")
 
-st.title("🏠 New Floorplan & Area Calculator")
-st.caption("Enter room counts → dimensions → get areas + auto floorplan.")
+st.title("🏠 Floorplan & Area Calculator")
+st.caption("Enter room counts → dimensions → get areas + auto floorplan → save multiple properties permanently.")
+
+# -----------------------------------
+# Persistent Storage
+# -----------------------------------
+DATA_FILE = "properties.json"
+
+def load_properties():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_properties(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+properties_data = load_properties()
 
 # -----------------------------------
 # Helper Functions
@@ -21,7 +40,7 @@ def room_area(l_ft, l_in, b_ft, b_in):
 
 def draw_floorplan(df):
     if df.empty:
-        st.info("Add rooms to view floorplan.")
+        st.info("Add rooms to see the floorplan.")
         return
     
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -49,6 +68,12 @@ def draw_floorplan(df):
     st.pyplot(fig)
 
 # -----------------------------------
+# UI: Property Name
+# -----------------------------------
+st.subheader("🏷 Property Name")
+property_name = st.text_input("Name your property", placeholder="e.g., Galaxy Heights 402")
+
+# -----------------------------------
 # Define Room Types
 # -----------------------------------
 room_types = {
@@ -64,7 +89,7 @@ room_types = {
 }
 
 # -----------------------------------
-# Room Counts (Cleaner UI)
+# Room Counts
 # -----------------------------------
 st.subheader("1️⃣ Select Room Counts")
 
@@ -76,9 +101,8 @@ for label in room_types:
     room_counts[label] = cols[i].number_input(label, min_value=0, max_value=10, value=0)
     i = (i + 1) % 3
 
-
 # -----------------------------------
-# Room Inputs
+# Room Dimensions Input
 # -----------------------------------
 st.subheader("2️⃣ Enter Room Dimensions")
 
@@ -112,7 +136,6 @@ for label, prefix in room_types.items():
                 "Area (sqft)": area
             })
 
-
 # -----------------------------------
 # Summary Table
 # -----------------------------------
@@ -121,20 +144,18 @@ df = pd.DataFrame(summary)
 st.subheader("3️⃣ Summary")
 
 if df.empty:
-    st.info("Add rooms to see data.")
+    st.info("Add rooms to see details.")
 else:
     st.dataframe(df, height=300)
 
     csv = df.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download CSV", csv, "area_summary.csv", "text/csv")
 
-
 # -----------------------------------
-# Floorplan Visualizer
+# Floorplan
 # -----------------------------------
-st.subheader("4️⃣ Floorplan Preview")
+st.subheader("4️⃣ Auto Floorplan Visualizer")
 draw_floorplan(df)
-
 
 # -----------------------------------
 # Totals
@@ -146,12 +167,48 @@ if not df.empty:
     total_sqyd = total_sqft / 9
     claimed_area = total_sqft / 0.75
 
-    st.metric("Carpet Area", f"{total_sqft:.1f} sq ft", "")
+    st.metric("Carpet Area", f"{total_sqft:.1f} sq ft")
     st.metric("Carpet Area", f"{total_sqyd:.1f} sq yd")
+
     st.write("---")
+
     st.metric("Claimed Area", f"{claimed_area:.1f} sq ft")
     st.metric("Claimed Area", f"{claimed_area/9:.1f} sq yd")
 
-    st.success("Done!")
+    st.success("Calculation complete!")
 
+# -----------------------------------
+# Save Property
+# -----------------------------------
+if not df.empty and property_name.strip():
+    if st.button("💾 Save Property"):
+        properties_data[property_name] = {
+            "rooms": df.to_dict(orient="records"),
+            "total_sqft": float(total_sqft),
+            "total_sqyd": float(total_sqyd),
+            "claimed_area": float(claimed_area)
+        }
+        save_properties(properties_data)
+        st.success(f"Saved '{property_name}' successfully!")
+
+# -----------------------------------
+# Compare Saved Properties
+# -----------------------------------
+st.header("📊 Compare Saved Properties")
+
+if properties_data:
+    compare_df = pd.DataFrame([
+        {
+            "Property": name,
+            "Carpet Area (sqft)": info["total_sqft"],
+            "Carpet Area (sqyd)": info["total_sqyd"],
+            "Claimed Area (sqft)": info["claimed_area"]
+        }
+        for name, info in properties_data.items()
+    ])
+
+    st.dataframe(compare_df)
+
+else:
+    st.info("No properties saved yet.")
 
